@@ -3,70 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Safety Awareness Quiz</title>
+    <title>Safety Awareness Portal | Tata Steel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { background: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
         .neon-text { font-family: 'Orbitron', sans-serif; text-shadow: 0 0 10px #38bdf8; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
         .timer-bar { transition: width 1s linear; }
+        .option-btn { transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.1); }
+        .option-btn:hover { background: rgba(56, 189, 248, 0.1); border-color: #38bdf8; transform: translateX(5px); }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <div id="quiz-container" class="glass max-w-2xl w-full p-8 rounded-2xl shadow-2xl relative overflow-hidden">
-        <div id="timer-line" class="absolute top-0 left-0 h-1 bg-sky-500 timer-bar" style="width: 100%;"></div>
+    <div id="quiz-container" class="glass max-w-2xl w-full p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+        <div id="timer-line" class="absolute top-0 left-0 h-1.5 bg-sky-500 timer-bar" style="width: 100%;"></div>
 
         <div id="start-screen" class="text-center py-10">
-            <h1 class="text-4xl neon-text mb-6">AWARENESS PRO</h1>
-            <p class="mb-8 text-slate-400">20 Questions | 10 Seconds Each<br>Electrical & Medical Safety Essentials</p>
-            <button onclick="startQuiz()" class="bg-sky-500 hover:bg-sky-400 text-white font-bold py-3 px-10 rounded-full transition-all transform hover:scale-105">START CHALLENGE</button>
+            <div class="mb-6 flex justify-center">
+                <img src="https://www.tatasteel.com/media/8454/tata-steel-logo.png" alt="Tata Steel" class="h-12 brightness-200">
+            </div>
+            <h1 class="text-3xl neon-text mb-4">SAFETY AWARENESS EXAM</h1>
+            <p class="mb-8 text-slate-400 italic">Welcome, {{ username }}!<br>20 Questions | 10s Per Question | Passing: 10/50 Marks</p>
+            <button onclick="startQuiz()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-4 px-12 rounded-full transition-all transform hover:scale-105 shadow-lg shadow-sky-500/20">
+                BEGIN ASSESSMENT
+            </button>
         </div>
 
         <div id="question-box" class="hidden">
             <div class="flex justify-between items-center mb-6">
-                <span id="question-number" class="text-sky-400 font-bold">Question 1/20</span>
-                <span id="timer-text" class="text-rose-400 font-bold neon-text">10s</span>
+                <span id="question-number" class="text-sky-400 font-bold tracking-widest text-sm uppercase">Question 1/20</span>
+                <div class="flex items-center gap-2">
+                    <span id="timer-text" class="text-rose-400 font-bold neon-text text-xl">10s</span>
+                </div>
             </div>
             
-            <img id="q-image" src="" class="hidden w-full h-48 object-cover rounded-lg mb-4 border border-slate-700">
-            <h2 id="question-text" class="text-xl font-semibold mb-6"></h2>
+            <img id="q-image" src="" class="hidden w-full h-52 object-cover rounded-xl mb-6 border border-slate-700 shadow-inner">
+            <h2 id="question-text" class="text-xl font-medium mb-8 leading-relaxed"></h2>
             
-            <div id="options" class="grid grid-cols-1 gap-3">
+            <div id="options" class="grid grid-cols-1 gap-4">
                 </div>
         </div>
 
-        <div id="result-screen" class="hidden text-center py-10">
-            <h2 class="text-3xl neon-text mb-4">COMPLETED</h2>
-            <p class="text-5xl font-bold text-sky-400 mb-4" id="final-score">0/20</p>
-            <p id="feedback" class="text-slate-400 mb-8"></p>
-            <button onclick="location.reload()" class="border border-sky-500 text-sky-500 py-2 px-6 rounded-full hover:bg-sky-500 hover:text-white transition">RETRY</button>
+        <div id="result-screen" class="hidden text-center py-8">
+            <h2 id="status-title" class="text-4xl neon-text mb-2">RESULT</h2>
+            
+            <div class="my-8">
+                <p class="text-slate-400 uppercase tracking-widest text-xs mb-1">Total Score</p>
+                <p class="text-7xl font-bold" id="final-score">0/50</p>
+            </div>
+            
+            <p id="feedback" class="text-slate-300 mb-10 px-6 leading-relaxed"></p>
+            
+            <div class="flex flex-col items-center gap-4">
+                <button onclick="location.reload()" class="bg-slate-700 hover:bg-slate-600 text-white py-3 px-10 rounded-full transition">RETRY TEST</button>
+                <a href="/logout" class="text-slate-500 hover:text-sky-400 text-sm transition underline decoration-dotted">Exit Portal</a>
+                
+                <div class="mt-10 pt-8 border-t border-slate-800 w-full">
+                    <img src="https://www.tatasteel.com/media/8454/tata-steel-logo.png" alt="Tata Steel" class="h-8 mx-auto opacity-50 grayscale">
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         const questions = [
-            { q: "What is the first step when you see someone getting an electric shock?", options: ["Pull them away", "Turn off the power source", "Call a doctor", "Pour water"], correct: 1 },
-            { q: "Identify this medical emergency tool:", img: "https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=400", options: ["Stethoscope", "AED (Defibrillator)", "Inhaler", "Thermometer"], correct: 1 },
-            { q: "What does 'GFCI' stand for in electrical safety?", options: ["Ground Fault Circuit Interrupter", "General Fuse Control Instrument", "Grid Failure Current Index", "Global Fire Control Indicator"], correct: 0 },
-            { q: "In 'ABC' of first aid, what does 'B' stand for?", options: ["Bleeding", "Bones", "Breathing", "Burning"], correct: 2 },
-            { q: "Which of these is a non-conductive material?", options: ["Copper", "Silver", "Rubber", "Aluminum"], correct: 2 },
-            { q: "Identify this electrical hazard symbol:", img: "https://images.unsplash.com/photo-1590483734731-8979927d33d8?auto=format&fit=crop&w=400", options: ["Biohazard", "High Voltage", "Poison", "Radiation"], correct: 1 },
-            { q: "What is the normal body temperature for an adult?", options: ["35°C", "37°C", "39°C", "41°C"], correct: 1 },
-            { q: "Water should NEVER be used to extinguish which type of fire?", options: ["Wood", "Paper", "Electrical", "Cloth"], correct: 2 },
-            { q: "What is the 'Can't Let Go' threshold for electric current (mA)?", options: ["1-5 mA", "10-25 mA", "100-200 mA", "500 mA"], correct: 1 },
-            { q: "Where is the pulse usually checked on the neck?", options: ["Radial artery", "Carotid artery", "Femoral artery", "Aorta"], correct: 1 },
-            { q: "A 'Lockout/Tagout' (LOTO) procedure is used for:", options: ["Preventing theft", "Equipment maintenance safety", "Inventory control", "Door security"], correct: 1 },
-            { q: "What is the primary purpose of a circuit breaker?", options: ["Increase voltage", "Generate power", "Prevent overcurrent/fires", "Stabilize Wi-Fi"], correct: 2 },
-            { q: "What does CPR stand for?", options: ["Cardio Pulmonary Resuscitation", "Chest Pressure Recovery", "Cardiac Pulse Rescue", "Central Pump Repair"], correct: 0 },
-            { q: "Identify this medical sign of a stroke (FAST):", options: ["Fast Action", "Face drooping", "Foot swelling", "Frequent sneezing"], correct: 1 },
-            { q: "Which wire is usually the 'Ground' wire in most modern systems?", options: ["Black", "Red", "Green or Yellow", "Blue"], correct: 2 },
-            { q: "What should you do if an electrical appliance begins to smoke?", options: ["Blow on it", "Unplug it immediately", "Wrap it in a towel", "Spray it with water"], correct: 1 },
-            { q: "The 'Rule of Nines' is used to estimate the area of:", options: ["Fractures", "Burns", "Blood loss", "Organ size"], correct: 1 },
-            { q: "What is the safest tool for checking if a wire is live?", options: ["Fingertip", "Metal Screwdriver", "Voltage Tester", "Wrench"], correct: 2 },
-            { q: "Which organ is affected by 'Electrocution' first usually?", options: ["Lungs", "Heart", "Liver", "Kidneys"], correct: 1 },
-            { q: "A person with 'Hyperglycemia' has high:", options: ["Blood Pressure", "Blood Sugar", "Heart Rate", "Cholesterol"], correct: 1 }
+            { q: "What is the first step when you see someone getting an electric shock?", options: ["Pull them away by hand", "Isolate power source", "Call a doctor first", "Apply water"], correct: 1 },
+            { q: "Identify this medical life-saving device:", img: "https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=600", options: ["Ventilator", "AED (Defibrillator)", "Oxygen Tank", "BP Monitor"], correct: 1 },
+            { q: "Which class of fire extinguisher is used for electrical fires?", options: ["Class A", "Class B", "Class C / CO2", "Class D"], correct: 2 },
+            { q: "What does 'LOTO' stand for in industrial safety?", options: ["Live On Time Only", "Lockout Tagout", "Load Off Test Off", "List Of Technical Orders"], correct: 1 },
+            { q: "Identify this hazard sign:", img: "https://images.unsplash.com/photo-1590483734731-8979927d33d8?auto=format&fit=crop&w=600", options: ["Chemical Hazard", "High Voltage", "Radiation", "Slippery Floor"], correct: 1 },
+            { q: "In CPR, what is the correct ratio of chest compressions to breaths?", options: ["15:2", "30:2", "5:1", "50:2"], correct: 1 },
+            { q: "Which tool is used to safely check if a wire has current?", options: ["Naked hands", "Steel Ruler", "Non-Contact Voltage Tester", "Wet Cloth"], correct: 2 },
+            { q: "What is the primary sign of a Stroke (using FAST)?", options: ["Facial drooping", "Foot pain", "Frequent thirst", "Fever"], correct: 0 },
+            { q: "A 'Ground Fault' occurs when electricity travels to:", options: ["The motor", "The Earth/Ground", "The Switch", "The Light"], correct: 1 },
+            { q: "What is the safe limit for body temperature (°C)?", options: ["35°C", "37°C", "40°C", "42°C"], correct: 1 },
+            { q: "What is the first thing you do for a chemical burn?", options: ["Apply oil", "Rinse with cool water", "Wrap in plastic", "Rub vigorously"], correct: 1 },
+            { q: "Which material is the best insulator?", options: ["Silver", "Copper", "PVC/Rubber", "Iron"], correct: 2 },
+            { q: "A person in 'Shock' should be kept:", options: ["Standing up", "Walking", "Lying down with legs raised", "Sitting on a chair"], correct: 2 },
+            { q: "What does a blue safety sign usually represent?", options: ["Danger", "Warning", "Mandatory Action", "Safe Condition"], correct: 2 },
+            { q: "How should you treat a minor electrical burn?", options: ["Ice cubes", "Cool running water", "Butter", "Adhesive bandage"], correct: 1 },
+            { q: "Identify this PPE item:", img: "https://images.unsplash.com/photo-1599708146112-969446a0669d?auto=format&fit=crop&w=600", options: ["Safety Goggles", "Ear Plugs", "Arc Flash Shield", "Dust Mask"], correct: 2 },
+            { q: "The 'Rule of Nines' helps doctors assess:", options: ["Bone fractures", "Burn surface area", "Blood sugar", "Vision"], correct: 1 },
+            { q: "What is the 'Golden Hour' in medical terms?", options: ["Hour before work", "First hour after injury", "Time for lunch", "Last hour of shift"], correct: 1 },
+            { q: "Static electricity is most dangerous near:", options: ["Water", "Flammable vapors", "Wood", "Rubber"], correct: 1 },
+            { q: "What is the maximum current (mA) a human heart can withstand before stopping?", options: ["10mA", "50-100mA", "500mA", "1000mA"], correct: 1 }
         ];
 
         let currentQ = 0;
@@ -101,7 +123,7 @@
             optionsDiv.innerHTML = '';
             q.options.forEach((opt, i) => {
                 const btn = document.createElement('button');
-                btn.className = "text-left p-4 rounded-xl border border-slate-700 hover:border-sky-500 hover:bg-sky-500/10 transition-all";
+                btn.className = "option-btn text-left p-4 rounded-xl text-slate-200 font-medium";
                 btn.innerText = opt;
                 btn.onclick = () => selectOption(i);
                 optionsDiv.appendChild(btn);
@@ -117,6 +139,11 @@
         function updateTimerUI() {
             document.getElementById('timer-text').innerText = timeLeft + 's';
             document.getElementById('timer-line').style.width = (timeLeft * 10) + '%';
+            if(timeLeft <= 3) {
+                document.getElementById('timer-text').classList.replace('text-rose-400', 'text-rose-600');
+            } else {
+                document.getElementById('timer-text').classList.replace('text-rose-600', 'text-rose-400');
+            }
         }
 
         function selectOption(index) {
@@ -134,8 +161,30 @@
         function showResults() {
             document.getElementById('question-box').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('final-score').innerText = `${score}/${questions.length}`;
-            document.getElementById('feedback').innerText = score > 15 ? "Expert! You are safety conscious." : "Keep learning! Safety saves lives.";
+            
+            const totalMarks = (score * 2.5); // 20 * 2.5 = 50 total marks
+            const finalScoreEl = document.getElementById('final-score');
+            const statusTitle = document.getElementById('status-title');
+            const feedbackEl = document.getElementById('feedback');
+
+            finalScoreEl.innerText = `${totalMarks}/50`;
+
+            if (totalMarks >= 10) {
+                statusTitle.innerText = "ASSESSMENT PASSED";
+                statusTitle.className = "text-4xl neon-text mb-2 text-green-400";
+                feedbackEl.innerText = "Excellent. You have successfully cleared the Safety Awareness exam for Tata Steel operations.";
+            } else {
+                statusTitle.innerText = "ASSESSMENT FAILED";
+                statusTitle.className = "text-4xl neon-text mb-2 text-rose-500";
+                feedbackEl.innerText = "You did not achieve the minimum passing mark of 10. You are required to re-study the safety manual and try again.";
+            }
+
+            // Sync with backend MongoDB
+            fetch('/submit-score', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ score: totalMarks })
+            });
         }
     </script>
 </body>
