@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Profile | Safety Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { background: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .neon-text { font-family: 'Orbitron', sans-serif; text-shadow: 0 0 10px #38bdf8; }
+        .glass { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .status-pill { padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="glass max-w-2xl w-full p-8 rounded-3xl shadow-2xl relative">
+        <div class="flex justify-between items-start mb-10 border-b border-slate-800 pb-6">
+            <div>
+                <h1 class="text-2xl neon-text mb-1 uppercase tracking-wider">Employee Profile</h1>
+                <p class="text-slate-400 text-sm">Portal ID: <span class="text-sky-400">{{ user.username }}</span></p>
+            </div>
+            <img src="https://www.tatasteel.com/media/8454/tata-steel-logo.png" alt="Tata Steel" class="h-8 brightness-200 opacity-80">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800">
+                <p class="text-slate-500 text-xs uppercase tracking-widest mb-2">Latest Assessment Score</p>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-5xl font-bold text-white">{{ user.last_score }}</span>
+                    <span class="text-slate-500">/ 50 Marks</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 flex flex-col justify-center">
+                <p class="text-slate-500 text-xs uppercase tracking-widest mb-2">Certification Status</p>
+                <div>
+                    <span class="status-pill {{ 'bg-green-500/20 ' + status_color if status == 'PASSED' else 'bg-rose-500/20 ' + status_color }}">
+                        {{ status }}
+                    </span>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-4 leading-tight">
+                    *Min. 10/50 marks required for operational clearance.
+                </p>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <a href="/" class="block w-full text-center bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-xl transition-all">
+                {{ 'RE-TAKE ASSESSMENT' if status == 'FAILED' else 'RE-CERTIFY NOW' }}
+            </a>
+            <div class="flex gap-3">
+                <a href="/logout" class="flex-1 text-center py-3 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-400 transition">Logout</a>
+            </div>
+        </div>
+
+        <div class="mt-10 text-center">
+            <p class="text-slate-600 text-[10px] uppercase tracking-widest">Tata Steel Global Safety Standards &copy; 2026</p>
+        </div>
+    </div>
+
+</body>
+</html>
