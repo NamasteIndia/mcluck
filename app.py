@@ -10,6 +10,23 @@ app.secret_key = "Tanuj_007"
 app.config["MONGO_URI"] = os.environ.get("MONGO_URI")
 mongo = PyMongo(app)
 
+@app.route('/profile')
+def profile():
+    if 'username' in session:
+        users = mongo.db.users
+        user_data = users.find_one({'username': session['username']})
+        
+        # Calculate status
+        last_score = user_data.get('last_score', 0)
+        status = "PASSED" if last_score >= 10 else "FAILED"
+        status_color = "text-green-400" if status == "PASSED" else "text-rose-500"
+        
+        return render_template('profile.html', 
+                               user=user_data, 
+                               status=status, 
+                               status_color=status_color)
+    return redirect(url_for('login'))
+
 @app.route('/')
 def index():
     if 'username' in session:
