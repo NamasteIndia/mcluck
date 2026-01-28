@@ -4,11 +4,27 @@ from flask_pymongo import PyMongo
 import bcrypt
 
 app = Flask(__name__)
-app.secret_key = "Tanuj_007"
+app.secret_key = "super_secret_safety_key"
 
-# MongoDB Config
-app.config["MONGO_URI"] = os.environ.get("MONGO_URI")
+# 1. Get the URI from Environment
+mongo_uri = os.environ.get("MONGO_URI")
+
+# 2. Safety check: If URI is missing, print a clear error in the logs
+if not mongo_uri:
+    print("CRITICAL ERROR: MONGO_URI environment variable is not set!")
+
+app.config["MONGO_URI"] = mongo_uri
+# 3. Initialize PyMongo
 mongo = PyMongo(app)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        # Check if db connection exists before using it
+        if mongo.db is None:
+            return "Database connection failed. Check your MONGO_URI and Atlas IP Whitelist.", 500
+            
+        users = mongo.db.users
 
 @app.route('/profile')
 def profile():
@@ -43,15 +59,6 @@ def login():
             return redirect(url_for('index'))
         return "Invalid username/password"
     return render_template('login.html')
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        users = mongo.db.users
-        hashed_pw = bcrypt.hashpw(request.form['password'].encode('utf-8'), bcrypt.gensalt())
-        users.insert_one({'username': request.form['username'], 'password': hashed_pw, 'high_score': 0})
-        return redirect(url_for('login'))
-    return render_template('register.html')
 
 @app.route('/submit-score', methods=['POST'])
 def submit_score():
