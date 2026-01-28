@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safety Awareness Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { background: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .neon-text { font-family: 'Orbitron', sans-serif; text-shadow: 0 0 10px #38bdf8; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .timer-bar { transition: width 1s linear; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="quiz-container" class="glass max-w-2xl w-full p-8 rounded-2xl shadow-2xl relative overflow-hidden">
+        <div id="timer-line" class="absolute top-0 left-0 h-1 bg-sky-500 timer-bar" style="width: 100%;"></div>
+
+        <div id="start-screen" class="text-center py-10">
+            <h1 class="text-4xl neon-text mb-6">AWARENESS PRO</h1>
+            <p class="mb-8 text-slate-400">20 Questions | 10 Seconds Each<br>Electrical & Medical Safety Essentials</p>
+            <button onclick="startQuiz()" class="bg-sky-500 hover:bg-sky-400 text-white font-bold py-3 px-10 rounded-full transition-all transform hover:scale-105">START CHALLENGE</button>
+        </div>
+
+        <div id="question-box" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <span id="question-number" class="text-sky-400 font-bold">Question 1/20</span>
+                <span id="timer-text" class="text-rose-400 font-bold neon-text">10s</span>
+            </div>
+            
+            <img id="q-image" src="" class="hidden w-full h-48 object-cover rounded-lg mb-4 border border-slate-700">
+            <h2 id="question-text" class="text-xl font-semibold mb-6"></h2>
+            
+            <div id="options" class="grid grid-cols-1 gap-3">
+                </div>
+        </div>
+
+        <div id="result-screen" class="hidden text-center py-10">
+            <h2 class="text-3xl neon-text mb-4">COMPLETED</h2>
+            <p class="text-5xl font-bold text-sky-400 mb-4" id="final-score">0/20</p>
+            <p id="feedback" class="text-slate-400 mb-8"></p>
+            <button onclick="location.reload()" class="border border-sky-500 text-sky-500 py-2 px-6 rounded-full hover:bg-sky-500 hover:text-white transition">RETRY</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "What is the first step when you see someone getting an electric shock?", options: ["Pull them away", "Turn off the power source", "Call a doctor", "Pour water"], correct: 1 },
+            { q: "Identify this medical emergency tool:", img: "https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=400", options: ["Stethoscope", "AED (Defibrillator)", "Inhaler", "Thermometer"], correct: 1 },
+            { q: "What does 'GFCI' stand for in electrical safety?", options: ["Ground Fault Circuit Interrupter", "General Fuse Control Instrument", "Grid Failure Current Index", "Global Fire Control Indicator"], correct: 0 },
+            { q: "In 'ABC' of first aid, what does 'B' stand for?", options: ["Bleeding", "Bones", "Breathing", "Burning"], correct: 2 },
+            { q: "Which of these is a non-conductive material?", options: ["Copper", "Silver", "Rubber", "Aluminum"], correct: 2 },
+            { q: "Identify this electrical hazard symbol:", img: "https://images.unsplash.com/photo-1590483734731-8979927d33d8?auto=format&fit=crop&w=400", options: ["Biohazard", "High Voltage", "Poison", "Radiation"], correct: 1 },
+            { q: "What is the normal body temperature for an adult?", options: ["35°C", "37°C", "39°C", "41°C"], correct: 1 },
+            { q: "Water should NEVER be used to extinguish which type of fire?", options: ["Wood", "Paper", "Electrical", "Cloth"], correct: 2 },
+            { q: "What is the 'Can't Let Go' threshold for electric current (mA)?", options: ["1-5 mA", "10-25 mA", "100-200 mA", "500 mA"], correct: 1 },
+            { q: "Where is the pulse usually checked on the neck?", options: ["Radial artery", "Carotid artery", "Femoral artery", "Aorta"], correct: 1 },
+            { q: "A 'Lockout/Tagout' (LOTO) procedure is used for:", options: ["Preventing theft", "Equipment maintenance safety", "Inventory control", "Door security"], correct: 1 },
+            { q: "What is the primary purpose of a circuit breaker?", options: ["Increase voltage", "Generate power", "Prevent overcurrent/fires", "Stabilize Wi-Fi"], correct: 2 },
+            { q: "What does CPR stand for?", options: ["Cardio Pulmonary Resuscitation", "Chest Pressure Recovery", "Cardiac Pulse Rescue", "Central Pump Repair"], correct: 0 },
+            { q: "Identify this medical sign of a stroke (FAST):", options: ["Fast Action", "Face drooping", "Foot swelling", "Frequent sneezing"], correct: 1 },
+            { q: "Which wire is usually the 'Ground' wire in most modern systems?", options: ["Black", "Red", "Green or Yellow", "Blue"], correct: 2 },
+            { q: "What should you do if an electrical appliance begins to smoke?", options: ["Blow on it", "Unplug it immediately", "Wrap it in a towel", "Spray it with water"], correct: 1 },
+            { q: "The 'Rule of Nines' is used to estimate the area of:", options: ["Fractures", "Burns", "Blood loss", "Organ size"], correct: 1 },
+            { q: "What is the safest tool for checking if a wire is live?", options: ["Fingertip", "Metal Screwdriver", "Voltage Tester", "Wrench"], correct: 2 },
+            { q: "Which organ is affected by 'Electrocution' first usually?", options: ["Lungs", "Heart", "Liver", "Kidneys"], correct: 1 },
+            { q: "A person with 'Hyperglycemia' has high:", options: ["Blood Pressure", "Blood Sugar", "Heart Rate", "Cholesterol"], correct: 1 }
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+        let timer;
+        let timeLeft = 10;
+
+        function startQuiz() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('question-box').classList.remove('hidden');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            clearInterval(timer);
+            timeLeft = 10;
+            updateTimerUI();
+            
+            const q = questions[currentQ];
+            document.getElementById('question-number').innerText = `Question ${currentQ + 1}/20`;
+            document.getElementById('question-text').innerText = q.q;
+            
+            const qImg = document.getElementById('q-image');
+            if(q.img) {
+                qImg.src = q.img;
+                qImg.classList.remove('hidden');
+            } else {
+                qImg.classList.add('hidden');
+            }
+
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = "text-left p-4 rounded-xl border border-slate-700 hover:border-sky-500 hover:bg-sky-500/10 transition-all";
+                btn.innerText = opt;
+                btn.onclick = () => selectOption(i);
+                optionsDiv.appendChild(btn);
+            });
+
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+                if(timeLeft <= 0) selectOption(-1);
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            document.getElementById('timer-text').innerText = timeLeft + 's';
+            document.getElementById('timer-line').style.width = (timeLeft * 10) + '%';
+        }
+
+        function selectOption(index) {
+            clearInterval(timer);
+            if(index === questions[currentQ].correct) score++;
+            
+            currentQ++;
+            if(currentQ < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('question-box').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = `${score}/${questions.length}`;
+            document.getElementById('feedback').innerText = score > 15 ? "Expert! You are safety conscious." : "Keep learning! Safety saves lives.";
+        }
+    </script>
+</body>
+</html>
