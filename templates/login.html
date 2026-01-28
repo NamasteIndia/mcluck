@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Safety Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { background: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .neon-text { font-family: 'Orbitron', sans-serif; text-shadow: 0 0 10px #38bdf8; }
+        .glass { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="glass max-w-md w-full p-10 rounded-3xl shadow-2xl">
+        <div class="text-center mb-8">
+            <img src="https://www.tatasteel.com/media/8454/tata-steel-logo.png" alt="Tata Steel" class="h-10 mx-auto mb-4 brightness-200">
+            <h1 class="text-2xl neon-text">EXAM LOGIN</h1>
+            <p class="text-slate-400 text-sm mt-2">Enter your credentials to begin</p>
+        </div>
+
+        <form action="/login" method="POST" class="space-y-6">
+            <div>
+                <label class="block text-xs uppercase tracking-widest text-sky-400 mb-2">User ID</label>
+                <input type="text" name="username" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-sky-500 text-white">
+            </div>
+            <div>
+                <label class="block text-xs uppercase tracking-widest text-sky-400 mb-2">Password</label>
+                <input type="password" name="password" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-sky-500 text-white">
+            </div>
+            <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 py-3 rounded-lg font-bold transition-all shadow-lg shadow-sky-500/20">ACCESS PORTAL</button>
+        </form>
+
+        <div class="mt-8 text-center">
+            <p class="text-slate-500 text-sm">No account? <a href="/register" class="text-sky-400 hover:underline">Register Employee ID</a></p>
+        </div>
+    </div>
+</body>
+</html>
