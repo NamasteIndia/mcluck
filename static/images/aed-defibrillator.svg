@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <rect width="600" height="400" fill="#1e293b"/>
+  <rect x="150" y="100" width="300" height="200" rx="15" fill="#334155"/>
+  <circle cx="300" cy="180" r="40" fill="#ef4444"/>
+  <path d="M 280 180 L 290 180 L 295 160 L 305 200 L 310 180 L 320 180" stroke="white" stroke-width="3" fill="none"/>
+  <rect x="250" y="240" width="100" height="30" rx="5" fill="#22c55e"/>
+  <text x="300" y="285" font-family="Arial, sans-serif" font-size="16" fill="white" text-anchor="middle" font-weight="bold">AED</text>
+  <text x="300" y="305" font-family="Arial, sans-serif" font-size="12" fill="#94a3b8" text-anchor="middle">Automated External Defibrillator</text>
+</svg>

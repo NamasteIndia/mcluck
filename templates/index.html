@@ -91,28 +91,71 @@
     </div>
 
     <script>
-        const questions = [
-            { q: "What is the first step when you see someone getting an electric shock?", options: ["Pull them away by hand", "Isolate power source", "Call a doctor first", "Apply water"], correct: 1 },
-            { q: "Identify this medical life-saving device:", img: "https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=600", options: ["Ventilator", "AED (Defibrillator)", "Oxygen Tank", "BP Monitor"], correct: 1 },
-            { q: "Which class of fire extinguisher is used for electrical fires?", options: ["Class A", "Class B", "Class C / CO2", "Class D"], correct: 2 },
-            { q: "What does 'LOTO' stand for in industrial safety?", options: ["Live On Time Only", "Lockout Tagout", "Load Off Test Off", "List Of Technical Orders"], correct: 1 },
-            { q: "Identify this hazard sign:", img: "https://images.unsplash.com/photo-1590483734731-8979927d33d8?auto=format&fit=crop&w=600", options: ["Chemical Hazard", "High Voltage", "Radiation", "Slippery Floor"], correct: 1 },
-            { q: "In CPR, what is the correct ratio of chest compressions to breaths?", options: ["15:2", "30:2", "5:1", "50:2"], correct: 1 },
-            { q: "Which tool is used to safely check if a wire has current?", options: ["Naked hands", "Steel Ruler", "Non-Contact Voltage Tester", "Wet Cloth"], correct: 2 },
-            { q: "What is the primary sign of a Stroke (using FAST)?", options: ["Facial drooping", "Foot pain", "Frequent thirst", "Fever"], correct: 0 },
-            { q: "A 'Ground Fault' occurs when electricity travels to:", options: ["The motor", "The Earth/Ground", "The Switch", "The Light"], correct: 1 },
-            { q: "What is the safe limit for body temperature (°C)?", options: ["35°C", "37°C", "40°C", "42°C"], correct: 1 },
-            { q: "What is the first thing you do for a chemical burn?", options: ["Apply oil", "Rinse with cool water", "Wrap in plastic", "Rub vigorously"], correct: 1 },
-            { q: "Which material is the best insulator?", options: ["Silver", "Copper", "PVC/Rubber", "Iron"], correct: 2 },
-            { q: "A person in 'Shock' should be kept:", options: ["Standing up", "Walking", "Lying down with legs raised", "Sitting on a chair"], correct: 2 },
-            { q: "What does a blue safety sign usually represent?", options: ["Danger", "Warning", "Mandatory Action", "Safe Condition"], correct: 2 },
-            { q: "How should you treat a minor electrical burn?", options: ["Ice cubes", "Cool running water", "Butter", "Adhesive bandage"], correct: 1 },
-            { q: "Identify this PPE item:", img: "https://images.unsplash.com/photo-1599708146112-969446a0669d?auto=format&fit=crop&w=600", options: ["Safety Goggles", "Ear Plugs", "Arc Flash Shield", "Dust Mask"], correct: 2 },
-            { q: "The 'Rule of Nines' helps doctors assess:", options: ["Bone fractures", "Burn surface area", "Blood sugar", "Vision"], correct: 1 },
-            { q: "What is the 'Golden Hour' in medical terms?", options: ["Hour before work", "First hour after injury", "Time for lunch", "Last hour of shift"], correct: 1 },
-            { q: "Static electricity is most dangerous near:", options: ["Water", "Flammable vapors", "Wood", "Rubber"], correct: 1 },
-            { q: "What is the maximum current (mA) a human heart can withstand before stopping?", options: ["10mA", "50-100mA", "500mA", "1000mA"], correct: 1 }
+        const allQuestions = [
+            // Electrical Safety Questions
+            { q: "What is the first step when you see someone getting an electric shock?", options: ["Pull them away by hand", "Isolate power source", "Call a doctor first", "Apply water"], correct: 1, category: "electrical" },
+            { q: "Which class of fire extinguisher is used for electrical fires?", options: ["Class A", "Class B", "Class C / CO2", "Class D"], correct: 2, category: "electrical" },
+            { q: "What does 'LOTO' stand for in industrial safety?", options: ["Live On Time Only", "Lockout Tagout", "Load Off Test Off", "List Of Technical Orders"], correct: 1, category: "electrical" },
+            { q: "Identify this hazard sign:", img: "/static/images/high-voltage-sign.svg", options: ["Chemical Hazard", "High Voltage", "Radiation", "Slippery Floor"], correct: 1, category: "electrical" },
+            { q: "Which tool is used to safely check if a wire has current?", options: ["Naked hands", "Steel Ruler", "Non-Contact Voltage Tester", "Wet Cloth"], correct: 2, category: "electrical" },
+            { q: "A 'Ground Fault' occurs when electricity travels to:", options: ["The motor", "The Earth/Ground", "The Switch", "The Light"], correct: 1, category: "electrical" },
+            { q: "Which material is the best insulator?", options: ["Silver", "Copper", "PVC/Rubber", "Iron"], correct: 2, category: "electrical" },
+            { q: "How should you treat a minor electrical burn?", options: ["Ice cubes", "Cool running water", "Butter", "Adhesive bandage"], correct: 1, category: "electrical" },
+            { q: "Identify this PPE item:", img: "/static/images/arc-flash-shield.svg", options: ["Safety Goggles", "Ear Plugs", "Arc Flash Shield", "Dust Mask"], correct: 2, category: "electrical" },
+            { q: "Static electricity is most dangerous near:", options: ["Water", "Flammable vapors", "Wood", "Rubber"], correct: 1, category: "electrical" },
+            { q: "What is the maximum current (mA) a human heart can withstand before stopping?", options: ["10mA", "50-100mA", "500mA", "1000mA"], correct: 1, category: "electrical" },
+            { q: "What is the safe voltage limit for human touch under dry conditions?", options: ["12V", "50V", "110V", "220V"], correct: 1, category: "electrical" },
+            { q: "What should you do before working on any electrical equipment?", options: ["Wear gloves only", "Disconnect power and verify with tester", "Work quickly", "Use rubber shoes"], correct: 1, category: "electrical" },
+            { q: "Double insulation in power tools is indicated by which symbol?", options: ["Single square", "Double square", "Triangle", "Circle"], correct: 1, category: "electrical" },
+            { q: "What is the main danger of working with electricity in wet conditions?", options: ["Equipment damage", "Reduced resistance increases shock risk", "Slower work", "Visual impairment"], correct: 1, category: "electrical" },
+            { q: "Which PPE is essential when working on live electrical panels?", options: ["Safety shoes only", "Insulated gloves and face shield", "Hard hat only", "Regular gloves"], correct: 1, category: "electrical" },
+            { q: "What does GFI/GFCI stand for?", options: ["General Fault Indicator", "Ground Fault Interrupter", "Grounded Fuse Isolator", "General Function Isolator"], correct: 1, category: "electrical" },
+            { q: "The color of wire used for grounding/earthing is:", options: ["Red", "Black", "Green/Yellow", "Blue"], correct: 2, category: "electrical" },
+            { q: "Arc flash hazard is most severe at what voltage level?", options: ["Below 50V", "50-240V", "Above 240V", "Only at 1000V+"], correct: 2, category: "electrical" },
+            { q: "What is the primary purpose of circuit breakers?", options: ["Save electricity", "Prevent overload and short circuits", "Reduce voltage", "Store power"], correct: 1, category: "electrical" },
+            
+            // Pre-Medical/First Aid Questions
+            { q: "Identify this medical life-saving device:", img: "/static/images/aed-defibrillator.svg", options: ["Ventilator", "AED (Defibrillator)", "Oxygen Tank", "BP Monitor"], correct: 1, category: "premedical" },
+            { q: "In CPR, what is the correct ratio of chest compressions to breaths?", options: ["15:2", "30:2", "5:1", "50:2"], correct: 1, category: "premedical" },
+            { q: "What is the primary sign of a Stroke (using FAST)?", options: ["Facial drooping", "Foot pain", "Frequent thirst", "Fever"], correct: 0, category: "premedical" },
+            { q: "What is the safe limit for body temperature (°C)?", options: ["35°C", "37°C", "40°C", "42°C"], correct: 1, category: "premedical" },
+            { q: "What is the first thing you do for a chemical burn?", options: ["Apply oil", "Rinse with cool water", "Wrap in plastic", "Rub vigorously"], correct: 1, category: "premedical" },
+            { q: "A person in 'Shock' should be kept:", options: ["Standing up", "Walking", "Lying down with legs raised", "Sitting on a chair"], correct: 2, category: "premedical" },
+            { q: "The 'Rule of Nines' helps doctors assess:", options: ["Bone fractures", "Burn surface area", "Blood sugar", "Vision"], correct: 1, category: "premedical" },
+            { q: "What is the 'Golden Hour' in medical terms?", options: ["Hour before work", "First hour after injury", "Time for lunch", "Last hour of shift"], correct: 1, category: "premedical" },
+            { q: "What is the correct depth for chest compressions in adult CPR?", options: ["1-2 inches", "2-2.4 inches", "3-4 inches", "4-5 inches"], correct: 1, category: "premedical" },
+            { q: "What is the recommended rate for chest compressions per minute?", options: ["60-80", "100-120", "150-180", "200+"], correct: 1, category: "premedical" },
+            { q: "What does ABC stand for in first aid?", options: ["Always Be Careful", "Airway, Breathing, Circulation", "Assess, Bandage, Call", "Alert, Bleed control, CPR"], correct: 1, category: "premedical" },
+            { q: "What should you do first for a severe bleeding wound?", options: ["Apply ice", "Apply direct pressure", "Elevate only", "Clean with alcohol"], correct: 1, category: "premedical" },
+            { q: "How long should you apply pressure to stop bleeding?", options: ["30 seconds", "1 minute", "5-10 minutes", "30 minutes"], correct: 2, category: "premedical" },
+            { q: "What is the recovery position used for?", options: ["CPR", "Unconscious but breathing patient", "Broken bones", "Burns"], correct: 1, category: "premedical" },
+            { q: "What is the emergency number for most countries?", options: ["911 or 112", "999 only", "100 only", "108 only"], correct: 0, category: "premedical" },
+            { q: "What is the first aid for choking in a conscious adult?", options: ["Slap the back gently", "Give water", "Heimlich maneuver/abdominal thrusts", "Lay them down"], correct: 2, category: "premedical" },
+            { q: "What should you do for a suspected spinal injury?", options: ["Move to comfortable position", "Keep patient still and call emergency", "Try to sit them up", "Apply ice pack"], correct: 1, category: "premedical" },
+            { q: "How do you treat a minor burn?", options: ["Apply butter", "Cool water for 10-20 minutes", "Ice directly on burn", "Alcohol swab"], correct: 1, category: "premedical" },
+            { q: "What are the signs of heat stroke?", options: ["Shivering and blue lips", "Hot dry skin and confusion", "Normal temperature", "Mild headache"], correct: 1, category: "premedical" },
+            { q: "What should you NOT do for a nosebleed?", options: ["Pinch the nose", "Lean forward", "Tilt head back", "Apply cold compress"], correct: 2, category: "premedical" },
+            
+            // General Safety Questions
+            { q: "What does a blue safety sign usually represent?", options: ["Danger", "Warning", "Mandatory Action", "Safe Condition"], correct: 2, category: "general" },
+            { q: "What color is a fire exit sign?", options: ["Red", "Green", "Blue", "Yellow"], correct: 1, category: "general" },
+            { q: "What does PPE stand for?", options: ["Personal Protection Equipment", "Professional Protective Equipment", "Personal Protective Equipment", "Public Protection Equipment"], correct: 2, category: "general" },
+            { q: "When should safety goggles be worn?", options: ["Only when required", "When handling chemicals or debris", "Never", "Only outdoors"], correct: 1, category: "general" },
+            { q: "What is the purpose of a Safety Data Sheet (SDS)?", options: ["Employee schedule", "Chemical hazard information", "Building plans", "Emergency contacts"], correct: 1, category: "general" }
         ];
+        
+        // Shuffle array function to randomize questions
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+        
+        // Select 20 random questions from the pool
+        const questions = shuffleArray(allQuestions).slice(0, 20);
 
         let currentQ = 0;
         let score = 0;

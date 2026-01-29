@@ -105,7 +105,7 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """Employee Login"""
+    """Student Login"""
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
@@ -125,7 +125,7 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    """Employee Registration"""
+    """Student Registration"""
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
