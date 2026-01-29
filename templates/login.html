@@ -20,6 +20,22 @@
             <p class="text-slate-400 text-sm mt-2">Enter your credentials to begin</p>
         </div>
 
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-6 {% if category == 'success' %}bg-green-500/10 border-green-500/30{% else %}bg-rose-500/10 border-rose-500/30{% endif %} border rounded-lg p-4">
+                        <p class="{% if category == 'success' %}text-green-400{% else %}text-rose-400{% endif %} text-sm text-center">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if error %}
+        <div class="mb-6 bg-rose-500/10 border border-rose-500/30 rounded-lg p-4">
+            <p class="text-rose-400 text-sm text-center">{{ error }}</p>
+        </div>
+        {% endif %}
+
         <form action="/login" method="POST" class="space-y-6">
             <div>
                 <label class="block text-xs uppercase tracking-widest text-sky-400 mb-2">User ID</label>

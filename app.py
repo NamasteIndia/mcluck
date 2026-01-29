@@ -1,6 +1,6 @@
 import os
 import bcrypt
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from flask_pymongo import PyMongo
 
 app = Flask(__name__)
@@ -31,7 +31,7 @@ def login():
     """Employee Login"""
     if request.method == 'POST':
         if mongo.db is None:
-            return "Database connection error. Please check MONGO_URI.", 500
+            return render_template('login.html', error="Database connection error. Please check MONGO_URI.")
             
         users = mongo.db.users
         user = users.find_one({'username': request.form['username']})
@@ -40,7 +40,7 @@ def login():
             session['username'] = user['username']
             return redirect(url_for('index'))
         
-        return "Invalid User ID or Password. <a href='/login'>Try again</a>", 401
+        return render_template('login.html', error="Invalid User ID or Password. Please try again.")
         
     return render_template('login.html')
 
@@ -49,12 +49,12 @@ def register():
     """Employee Registration"""
     if request.method == 'POST':
         if mongo.db is None:
-            return "Database connection error.", 500
+            return render_template('register.html', error="Database connection error. Please try again later.")
             
         users = mongo.db.users
         # Check if ID already registered
         if users.find_one({'username': request.form['username']}):
-            return "User ID already exists! <a href='/register'>Try another</a>", 400
+            return render_template('register.html', error="User ID already exists! Please try another ID.")
             
         # Hash password and save
         hashed_pw = bcrypt.hashpw(request.form['password'].encode('utf-8'), bcrypt.gensalt())
@@ -63,6 +63,7 @@ def register():
             'password': hashed_pw, 
             'last_score': 0
         })
+        flash('Account created successfully! Please log in.', 'success')
         return redirect(url_for('login'))
     
     # This ensures the page loads when the user visits the URL

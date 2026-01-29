@@ -36,7 +36,7 @@
             <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 flex flex-col justify-center">
                 <p class="text-slate-500 text-xs uppercase tracking-widest mb-2">Certification Status</p>
                 <div>
-                    <span class="status-pill {{ 'bg-green-500/20 ' + status_color if status == 'PASSED' else 'bg-rose-500/20 ' + status_color }}">
+                    <span class="status-pill {% if status == 'PASSED' %}bg-green-500/20 {{ status_color }}{% else %}bg-rose-500/20 {{ status_color }}{% endif %}">
                         {{ status }}
                     </span>
                 </div>

@@ -19,6 +19,12 @@
             <p class="text-slate-400 text-sm mt-2">Create your safety assessment profile</p>
         </div>
 
+        {% if error %}
+        <div class="mb-6 bg-rose-500/10 border border-rose-500/30 rounded-lg p-4">
+            <p class="text-rose-400 text-sm text-center">{{ error }}</p>
+        </div>
+        {% endif %}
+
         <form action="/register" method="POST" class="space-y-6">
             <div>
                 <label class="block text-xs uppercase tracking-widest text-sky-400 mb-2">Desired User ID</label>

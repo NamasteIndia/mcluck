@@ -11,14 +11,37 @@
         .neon-text { font-family: 'Orbitron', sans-serif; text-shadow: 0 0 10px #38bdf8; }
         .glass { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
         .timer-bar { transition: width 1s linear; }
-        .option-btn { transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.1); }
-        .option-btn:hover { background: rgba(56, 189, 248, 0.1); border-color: #38bdf8; transform: translateX(5px); }
+        .option-btn { 
+            transition: all 0.2s ease; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            cursor: pointer;
+        }
+        .option-btn:hover { 
+            background: rgba(56, 189, 248, 0.1); 
+            border-color: #38bdf8; 
+            transform: translateX(5px); 
+        }
+        .option-btn:active {
+            transform: translateX(5px) scale(0.98);
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
     <div id="quiz-container" class="glass max-w-2xl w-full p-8 rounded-3xl shadow-2xl relative overflow-hidden">
         <div id="timer-line" class="absolute top-0 left-0 h-1.5 bg-sky-500 timer-bar" style="width: 100%;"></div>
+
+        <!-- Navigation bar -->
+        <div class="absolute top-4 right-4 flex gap-2">
+            <a href="/profile" class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors">
+                <svg class="w-5 h-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                Profile
+            </a>
+            <span class="text-slate-700">|</span>
+            <a href="/logout" class="text-slate-400 hover:text-rose-400 text-sm font-medium transition-colors">Logout</a>
+        </div>
 
         <div id="start-screen" class="text-center py-10">
             <div class="mb-6 flex justify-center">
@@ -139,10 +162,13 @@
         function updateTimerUI() {
             document.getElementById('timer-text').innerText = timeLeft + 's';
             document.getElementById('timer-line').style.width = (timeLeft * 10) + '%';
+            const timerText = document.getElementById('timer-text');
             if(timeLeft <= 3) {
-                document.getElementById('timer-text').classList.replace('text-rose-400', 'text-rose-600');
+                timerText.classList.remove('text-rose-400');
+                timerText.classList.add('text-rose-600');
             } else {
-                document.getElementById('timer-text').classList.replace('text-rose-600', 'text-rose-400');
+                timerText.classList.remove('text-rose-600');
+                timerText.classList.add('text-rose-400');
             }
         }
 
