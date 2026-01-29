@@ -31,7 +31,7 @@ def login():
     """Employee Login"""
     if request.method == 'POST':
         if mongo.db is None:
-            return render_template('login.html', error="Database connection error. Please check MONGO_URI.")
+            return render_template('login.html', error="Database connection error. Please check MONGO_URI."), 200
             
         users = mongo.db.users
         user = users.find_one({'username': request.form['username']})
@@ -40,7 +40,7 @@ def login():
             session['username'] = user['username']
             return redirect(url_for('index'))
         
-        return render_template('login.html', error="Invalid User ID or Password. Please try again.")
+        return render_template('login.html', error="Invalid User ID or Password. Please try again."), 200
         
     return render_template('login.html')
 
@@ -49,12 +49,12 @@ def register():
     """Employee Registration"""
     if request.method == 'POST':
         if mongo.db is None:
-            return render_template('register.html', error="Database connection error. Please try again later.")
+            return render_template('register.html', error="Database connection error. Please try again later."), 200
             
         users = mongo.db.users
         # Check if ID already registered
         if users.find_one({'username': request.form['username']}):
-            return render_template('register.html', error="User ID already exists! Please try another ID.")
+            return render_template('register.html', error="User ID already exists! Please try another ID."), 200
             
         # Hash password and save
         hashed_pw = bcrypt.hashpw(request.form['password'].encode('utf-8'), bcrypt.gensalt())
