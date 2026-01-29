@@ -1,7 +1,7 @@
 import os
+import json
 import bcrypt
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
-from flask_pymongo import PyMongo
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -12,14 +12,47 @@ app = Flask(__name__)
 # Secret key for session signing
 app.secret_key = os.environ.get("SECRET_KEY", "tata_steel_safety_2026_portal")
 
-# MongoDB Configuration
-# Ensure you have set MONGO_URI in Koyeb Environment Variables
-mongo_uri = os.environ.get("MONGO_URI")
-if not mongo_uri:
-    print("CRITICAL: MONGO_URI environment variable is missing!")
+# Local Storage Configuration
+DATA_FILE = 'users_data.json'
 
-app.config["MONGO_URI"] = mongo_uri
-mongo = PyMongo(app)
+def load_users():
+    """Load users from local JSON file"""
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_users(users):
+    """Save users to local JSON file"""
+    with open(DATA_FILE, 'w') as f:
+        json.dump(users, f, indent=2)
+
+def get_user(username):
+    """Get a user by username"""
+    users = load_users()
+    return users.get(username)
+
+def update_user(username, data):
+    """Update user data"""
+    users = load_users()
+    if username in users:
+        users[username].update(data)
+        save_users(users)
+        return True
+    return False
+
+def create_user(username, password):
+    """Create a new user"""
+    users = load_users()
+    if username in users:
+        return False
+    users[username] = {
+        'username': username,
+        'password': password,
+        'last_score': 0
+    }
+    save_users(users)
+    return True
 
 # --- ROUTES ---
 
@@ -34,13 +67,9 @@ def index():
 def login():
     """Employee Login"""
     if request.method == 'POST':
-        if mongo.db is None:
-            return render_template('login.html', error="Database connection error. Please check MONGO_URI."), 200
-            
-        users = mongo.db.users
-        user = users.find_one({'username': request.form['username']})
+        user = get_user(request.form['username'])
         
-        if user and bcrypt.checkpw(request.form['password'].encode('utf-8'), user['password']):
+        if user and bcrypt.checkpw(request.form['password'].encode('utf-8'), user['password'].encode('latin-1')):
             session['username'] = user['username']
             return redirect(url_for('index'))
         
@@ -52,38 +81,30 @@ def login():
 def register():
     """Employee Registration"""
     if request.method == 'POST':
-        if mongo.db is None:
-            return render_template('register.html', error="Database connection error. Please try again later."), 200
-            
-        users = mongo.db.users
+        username = request.form['username']
         # Check if ID already registered
-        if users.find_one({'username': request.form['username']}):
+        if get_user(username):
             return render_template('register.html', error="User ID already exists! Please try another ID."), 200
             
         # Hash password and save
         hashed_pw = bcrypt.hashpw(request.form['password'].encode('utf-8'), bcrypt.gensalt())
-        users.insert_one({
-            'username': request.form['username'], 
-            'password': hashed_pw, 
-            'last_score': 0
-        })
-        flash('Account created successfully! Please log in.', 'success')
-        return redirect(url_for('login'))
+        if create_user(username, hashed_pw.decode('latin-1')):
+            flash('Account created successfully! Please log in.', 'success')
+            return redirect(url_for('login'))
+        else:
+            return render_template('register.html', error="Registration failed. Please try again."), 200
     
     # This ensures the page loads when the user visits the URL
     return render_template('register.html')
 
 @app.route('/submit-score', methods=['POST'])
 def submit_score():
-    """Save Quiz Results to MongoDB"""
+    """Save Quiz Results to Local Storage"""
     if 'username' in session:
         data = request.json
         score = data.get('score', 0)
         
-        mongo.db.users.update_one(
-            {'username': session['username']},
-            {'$set': {'last_score': score}}
-        )
+        update_user(session['username'], {'last_score': score})
         return jsonify({"status": "success", "score": score})
     return jsonify({"status": "error", "message": "Unauthorized"}), 401
 
@@ -91,7 +112,10 @@ def submit_score():
 def profile():
     """User Result Dashboard"""
     if 'username' in session:
-        user_data = mongo.db.users.find_one({'username': session['username']})
+        user_data = get_user(session['username'])
+        
+        if not user_data:
+            return redirect(url_for('login'))
         
         # Grading Logic: Total Marks = 50, Pass = 10
         last_score = user_data.get('last_score', 0)
