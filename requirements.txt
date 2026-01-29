@@ -3,3 +3,4 @@ flask-pymongo
 bcrypt
 gunicorn
 dnspython
+python-dotenv>=1.0.0,<2.0.0
