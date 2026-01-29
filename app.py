@@ -1,8 +1,11 @@
 import os
+import json
 import bcrypt
+import base64
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
-from flask_pymongo import PyMongo
 from dotenv import load_dotenv
+import fcntl
+import time
 
 # Load environment variables from .env file
 load_dotenv()
@@ -12,14 +15,84 @@ app = Flask(__name__)
 # Secret key for session signing
 app.secret_key = os.environ.get("SECRET_KEY", "tata_steel_safety_2026_portal")
 
-# MongoDB Configuration
-# Ensure you have set MONGO_URI in Koyeb Environment Variables
-mongo_uri = os.environ.get("MONGO_URI")
-if not mongo_uri:
-    print("CRITICAL: MONGO_URI environment variable is missing!")
+# Local Storage Configuration
+DATA_FILE = 'users_data.json'
 
-app.config["MONGO_URI"] = mongo_uri
-mongo = PyMongo(app)
+def load_users():
+    """Load users from local JSON file"""
+    try:
+        if os.path.exists(DATA_FILE):
+            with open(DATA_FILE, 'r') as f:
+                fcntl.flock(f.fileno(), fcntl.LOCK_SH)  # Shared lock for reading
+                try:
+                    return json.load(f)
+                finally:
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)  # Unlock
+        return {}
+    except (json.JSONDecodeError, IOError) as e:
+        print(f"Error loading users: {e}")
+        return {}
+
+def save_users(users):
+    """Save users to local JSON file with file locking"""
+    try:
+        # Write to temporary file first, then rename for atomic operation
+        temp_file = DATA_FILE + '.tmp'
+        with open(temp_file, 'w') as f:
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX)  # Exclusive lock for writing
+            try:
+                json.dump(users, f, indent=2)
+                f.flush()
+                os.fsync(f.fileno())
+            finally:
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)  # Unlock
+        os.replace(temp_file, DATA_FILE)  # Atomic rename
+        return True
+    except (IOError, OSError) as e:
+        print(f"Error saving users: {e}")
+        return False
+
+def get_user(username):
+    """Get a user by username"""
+    users = load_users()
+    return users.get(username)
+
+def update_user(username, data):
+    """Update user data"""
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            users = load_users()
+            if username in users:
+                users[username].update(data)
+                if save_users(users):
+                    return True
+            return False
+        except Exception as e:
+            print(f"Error updating user (attempt {attempt + 1}): {e}")
+            time.sleep(0.1)  # Brief delay before retry
+    return False
+
+def create_user(username, password):
+    """Create a new user"""
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            users = load_users()
+            if username in users:
+                return False
+            users[username] = {
+                'username': username,
+                'password': password,
+                'last_score': 0
+            }
+            if save_users(users):
+                return True
+            return False
+        except Exception as e:
+            print(f"Error creating user (attempt {attempt + 1}): {e}")
+            time.sleep(0.1)  # Brief delay before retry
+    return False
 
 # --- ROUTES ---
 
@@ -34,13 +107,15 @@ def index():
 def login():
     """Employee Login"""
     if request.method == 'POST':
-        if mongo.db is None:
-            return render_template('login.html', error="Database connection error. Please check MONGO_URI."), 200
-            
-        users = mongo.db.users
-        user = users.find_one({'username': request.form['username']})
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
         
-        if user and bcrypt.checkpw(request.form['password'].encode('utf-8'), user['password']):
+        if not username or not password:
+            return render_template('login.html', error="Please provide both username and password."), 200
+        
+        user = get_user(username)
+        
+        if user and bcrypt.checkpw(password.encode('utf-8'), base64.b64decode(user['password'])):
             session['username'] = user['username']
             return redirect(url_for('index'))
         
@@ -52,46 +127,57 @@ def login():
 def register():
     """Employee Registration"""
     if request.method == 'POST':
-        if mongo.db is None:
-            return render_template('register.html', error="Database connection error. Please try again later."), 200
-            
-        users = mongo.db.users
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        
+        # Validate input
+        if not username or not password:
+            return render_template('register.html', error="Username and password are required."), 200
+        
+        if len(username) < 3 or len(username) > 50:
+            return render_template('register.html', error="Username must be between 3 and 50 characters."), 200
+        
+        if len(password) < 6:
+            return render_template('register.html', error="Password must be at least 6 characters long."), 200
+        
         # Check if ID already registered
-        if users.find_one({'username': request.form['username']}):
+        if get_user(username):
             return render_template('register.html', error="User ID already exists! Please try another ID."), 200
             
-        # Hash password and save
-        hashed_pw = bcrypt.hashpw(request.form['password'].encode('utf-8'), bcrypt.gensalt())
-        users.insert_one({
-            'username': request.form['username'], 
-            'password': hashed_pw, 
-            'last_score': 0
-        })
-        flash('Account created successfully! Please log in.', 'success')
-        return redirect(url_for('login'))
+        # Hash password and save (using base64 encoding for storage)
+        hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        hashed_pw_str = base64.b64encode(hashed_pw).decode('utf-8')
+        
+        if create_user(username, hashed_pw_str):
+            flash('Account created successfully! Please log in.', 'success')
+            return redirect(url_for('login'))
+        else:
+            return render_template('register.html', error="Registration failed. Please try again."), 200
     
     # This ensures the page loads when the user visits the URL
     return render_template('register.html')
 
 @app.route('/submit-score', methods=['POST'])
 def submit_score():
-    """Save Quiz Results to MongoDB"""
+    """Save Quiz Results to Local Storage"""
     if 'username' in session:
         data = request.json
         score = data.get('score', 0)
         
-        mongo.db.users.update_one(
-            {'username': session['username']},
-            {'$set': {'last_score': score}}
-        )
-        return jsonify({"status": "success", "score": score})
+        if update_user(session['username'], {'last_score': score}):
+            return jsonify({"status": "success", "score": score})
+        else:
+            return jsonify({"status": "error", "message": "Failed to save score"}), 500
     return jsonify({"status": "error", "message": "Unauthorized"}), 401
 
 @app.route('/profile')
 def profile():
     """User Result Dashboard"""
     if 'username' in session:
-        user_data = mongo.db.users.find_one({'username': session['username']})
+        user_data = get_user(session['username'])
+        
+        if not user_data:
+            return redirect(url_for('login'))
         
         # Grading Logic: Total Marks = 50, Pass = 10
         last_score = user_data.get('last_score', 0)
