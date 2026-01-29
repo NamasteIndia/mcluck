@@ -118,7 +118,7 @@
             { q: "Identify this medical life-saving device:", img: "/static/images/aed-defibrillator.svg", options: ["Ventilator", "AED (Defibrillator)", "Oxygen Tank", "BP Monitor"], correct: 1, category: "premedical" },
             { q: "In CPR, what is the correct ratio of chest compressions to breaths?", options: ["15:2", "30:2", "5:1", "50:2"], correct: 1, category: "premedical" },
             { q: "What is the primary sign of a Stroke (using FAST)?", options: ["Facial drooping", "Foot pain", "Frequent thirst", "Fever"], correct: 0, category: "premedical" },
-            { q: "What is the safe limit for body temperature (°C)?", options: ["35°C", "37°C", "40°C", "42°C"], correct: 1, category: "premedical" },
+            { q: "What is the normal body temperature (°C)?", options: ["35°C", "37°C", "40°C", "42°C"], correct: 1, category: "premedical" },
             { q: "What is the first thing you do for a chemical burn?", options: ["Apply oil", "Rinse with cool water", "Wrap in plastic", "Rub vigorously"], correct: 1, category: "premedical" },
             { q: "A person in 'Shock' should be kept:", options: ["Standing up", "Walking", "Lying down with legs raised", "Sitting on a chair"], correct: 2, category: "premedical" },
             { q: "The 'Rule of Nines' helps doctors assess:", options: ["Bone fractures", "Burn surface area", "Blood sugar", "Vision"], correct: 1, category: "premedical" },
@@ -129,7 +129,7 @@
             { q: "What should you do first for a severe bleeding wound?", options: ["Apply ice", "Apply direct pressure", "Elevate only", "Clean with alcohol"], correct: 1, category: "premedical" },
             { q: "How long should you apply pressure to stop bleeding?", options: ["30 seconds", "1 minute", "5-10 minutes", "30 minutes"], correct: 2, category: "premedical" },
             { q: "What is the recovery position used for?", options: ["CPR", "Unconscious but breathing patient", "Broken bones", "Burns"], correct: 1, category: "premedical" },
-            { q: "What is the emergency number for most countries?", options: ["911 or 112", "999 only", "100 only", "108 only"], correct: 0, category: "premedical" },
+            { q: "What is the unified emergency number in India?", options: ["100", "101", "112", "108"], correct: 2, category: "premedical" },
             { q: "What is the first aid for choking in a conscious adult?", options: ["Slap the back gently", "Give water", "Heimlich maneuver/abdominal thrusts", "Lay them down"], correct: 2, category: "premedical" },
             { q: "What should you do for a suspected spinal injury?", options: ["Move to comfortable position", "Keep patient still and call emergency", "Try to sit them up", "Apply ice pack"], correct: 1, category: "premedical" },
             { q: "How do you treat a minor burn?", options: ["Apply butter", "Cool water for 10-20 minutes", "Ice directly on burn", "Alcohol swab"], correct: 1, category: "premedical" },
@@ -139,9 +139,9 @@
             // General Safety Questions
             { q: "What does a blue safety sign usually represent?", options: ["Danger", "Warning", "Mandatory Action", "Safe Condition"], correct: 2, category: "general" },
             { q: "What color is a fire exit sign?", options: ["Red", "Green", "Blue", "Yellow"], correct: 1, category: "general" },
-            { q: "What does PPE stand for?", options: ["Personal Protection Equipment", "Professional Protective Equipment", "Personal Protective Equipment", "Public Protection Equipment"], correct: 2, category: "general" },
+            { q: "What does PPE stand for?", options: ["Public Protection Equipment", "Professional Protective Equipment", "Personal Protective Equipment", "Primary Protection Equipment"], correct: 2, category: "general" },
             { q: "When should safety goggles be worn?", options: ["Only when required", "When handling chemicals or debris", "Never", "Only outdoors"], correct: 1, category: "general" },
-            { q: "What is the purpose of a Safety Data Sheet (SDS)?", options: ["Employee schedule", "Chemical hazard information", "Building plans", "Emergency contacts"], correct: 1, category: "general" }
+            { q: "What is the purpose of a Safety Data Sheet (SDS)?", options: ["Student schedule", "Chemical hazard information", "Building plans", "Emergency contacts"], correct: 1, category: "general" }
         ];
         
         // Shuffle array function to randomize questions
@@ -154,8 +154,9 @@
             return shuffled;
         }
         
-        // Select 20 random questions from the pool
-        const questions = shuffleArray(allQuestions).slice(0, 20);
+        // Select 20 random questions from the pool (or all available if less than 20)
+        const numQuestions = Math.min(20, allQuestions.length);
+        const questions = shuffleArray(allQuestions).slice(0, numQuestions);
 
         let currentQ = 0;
         let score = 0;
