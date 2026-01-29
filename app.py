@@ -2,6 +2,10 @@ import os
 import bcrypt
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from flask_pymongo import PyMongo
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 
