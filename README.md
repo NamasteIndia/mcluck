@@ -19,7 +19,7 @@ A Flask-based web application for conducting safety quizzes with user authentica
 
 ## Prerequisites
 
-- Python 3.7 or higher
+- Python 3.9 or higher
 - pip (Python package installer)
 
 ## Installation
@@ -41,9 +41,9 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Configure environment variables (optional):
-   - Copy `.env.example` to `.env` if you need to customize settings
-   - The default secret key will be used if not specified
+4. Configure environment variables:
+   - Set `SECRET_KEY` environment variable for production use
+   - Never use the default secret key in production
 
 ## Running the Application
 
@@ -87,7 +87,7 @@ User data is stored locally in `users_data.json` with the following structure:
 {
   "username": {
     "username": "username",
-    "password": "hashed_password",
+    "password": "base64_encoded_hashed_password",
     "last_score": 0
   }
 }
@@ -95,11 +95,43 @@ User data is stored locally in `users_data.json` with the following structure:
 
 **Note**: The `users_data.json` file is automatically created on first use and is excluded from version control via `.gitignore`.
 
+### ⚠️ Important Limitations
+
+**This local storage solution is intended for:**
+- Single-user development and testing
+- Proof of concept applications
+- Learning purposes
+- Small-scale deployments with minimal concurrency
+
+**NOT suitable for:**
+- Production deployments with multiple server instances
+- High-concurrency environments
+- Applications requiring strong data consistency guarantees
+- Scenarios where data integrity is critical
+
+For production use cases, consider using a proper database solution like PostgreSQL, MySQL, or MongoDB.
+
 ## Security
 
 - Passwords are hashed using bcrypt with salt
+- Hashed passwords are stored as base64-encoded strings
 - Session management with secure cookies
-- Local file-based storage (no external database required)
+- File locking implemented to prevent concurrent write conflicts
+- Input validation for username and password requirements
+
+### Security Considerations
+
+**Local file-based storage has limitations:**
+- No built-in encryption at rest
+- Limited access control (relies on file system permissions)
+- Less secure than professional database solutions
+- Ensure proper file permissions on `users_data.json` (readable/writable only by application user)
+
+For production deployments requiring strong security, use a proper database with:
+- Encryption at rest and in transit
+- Role-based access control
+- Audit logging
+- Transaction support
 
 ## Project Structure
 

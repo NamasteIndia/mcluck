@@ -1,8 +1,11 @@
 import os
 import json
 import bcrypt
+import base64
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from dotenv import load_dotenv
+import fcntl
+import time
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,15 +20,37 @@ DATA_FILE = 'users_data.json'
 
 def load_users():
     """Load users from local JSON file"""
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r') as f:
-            return json.load(f)
-    return {}
+    try:
+        if os.path.exists(DATA_FILE):
+            with open(DATA_FILE, 'r') as f:
+                fcntl.flock(f.fileno(), fcntl.LOCK_SH)  # Shared lock for reading
+                try:
+                    return json.load(f)
+                finally:
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)  # Unlock
+        return {}
+    except (json.JSONDecodeError, IOError) as e:
+        print(f"Error loading users: {e}")
+        return {}
 
 def save_users(users):
-    """Save users to local JSON file"""
-    with open(DATA_FILE, 'w') as f:
-        json.dump(users, f, indent=2)
+    """Save users to local JSON file with file locking"""
+    try:
+        # Write to temporary file first, then rename for atomic operation
+        temp_file = DATA_FILE + '.tmp'
+        with open(temp_file, 'w') as f:
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX)  # Exclusive lock for writing
+            try:
+                json.dump(users, f, indent=2)
+                f.flush()
+                os.fsync(f.fileno())
+            finally:
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)  # Unlock
+        os.replace(temp_file, DATA_FILE)  # Atomic rename
+        return True
+    except (IOError, OSError) as e:
+        print(f"Error saving users: {e}")
+        return False
 
 def get_user(username):
     """Get a user by username"""
@@ -34,25 +59,40 @@ def get_user(username):
 
 def update_user(username, data):
     """Update user data"""
-    users = load_users()
-    if username in users:
-        users[username].update(data)
-        save_users(users)
-        return True
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            users = load_users()
+            if username in users:
+                users[username].update(data)
+                if save_users(users):
+                    return True
+            return False
+        except Exception as e:
+            print(f"Error updating user (attempt {attempt + 1}): {e}")
+            time.sleep(0.1)  # Brief delay before retry
     return False
 
 def create_user(username, password):
     """Create a new user"""
-    users = load_users()
-    if username in users:
-        return False
-    users[username] = {
-        'username': username,
-        'password': password,
-        'last_score': 0
-    }
-    save_users(users)
-    return True
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            users = load_users()
+            if username in users:
+                return False
+            users[username] = {
+                'username': username,
+                'password': password,
+                'last_score': 0
+            }
+            if save_users(users):
+                return True
+            return False
+        except Exception as e:
+            print(f"Error creating user (attempt {attempt + 1}): {e}")
+            time.sleep(0.1)  # Brief delay before retry
+    return False
 
 # --- ROUTES ---
 
@@ -67,9 +107,15 @@ def index():
 def login():
     """Employee Login"""
     if request.method == 'POST':
-        user = get_user(request.form['username'])
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
         
-        if user and bcrypt.checkpw(request.form['password'].encode('utf-8'), user['password'].encode('latin-1')):
+        if not username or not password:
+            return render_template('login.html', error="Please provide both username and password."), 200
+        
+        user = get_user(username)
+        
+        if user and bcrypt.checkpw(password.encode('utf-8'), base64.b64decode(user['password'])):
             session['username'] = user['username']
             return redirect(url_for('index'))
         
@@ -81,14 +127,28 @@ def login():
 def register():
     """Employee Registration"""
     if request.method == 'POST':
-        username = request.form['username']
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        
+        # Validate input
+        if not username or not password:
+            return render_template('register.html', error="Username and password are required."), 200
+        
+        if len(username) < 3 or len(username) > 50:
+            return render_template('register.html', error="Username must be between 3 and 50 characters."), 200
+        
+        if len(password) < 6:
+            return render_template('register.html', error="Password must be at least 6 characters long."), 200
+        
         # Check if ID already registered
         if get_user(username):
             return render_template('register.html', error="User ID already exists! Please try another ID."), 200
             
-        # Hash password and save
-        hashed_pw = bcrypt.hashpw(request.form['password'].encode('utf-8'), bcrypt.gensalt())
-        if create_user(username, hashed_pw.decode('latin-1')):
+        # Hash password and save (using base64 encoding for storage)
+        hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        hashed_pw_str = base64.b64encode(hashed_pw).decode('utf-8')
+        
+        if create_user(username, hashed_pw_str):
             flash('Account created successfully! Please log in.', 'success')
             return redirect(url_for('login'))
         else:
@@ -104,8 +164,10 @@ def submit_score():
         data = request.json
         score = data.get('score', 0)
         
-        update_user(session['username'], {'last_score': score})
-        return jsonify({"status": "success", "score": score})
+        if update_user(session['username'], {'last_score': score}):
+            return jsonify({"status": "success", "score": score})
+        else:
+            return jsonify({"status": "error", "message": "Failed to save score"}), 500
     return jsonify({"status": "error", "message": "Unauthorized"}), 401
 
 @app.route('/profile')
